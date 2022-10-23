@@ -14,6 +14,11 @@ export default interface CollectionConfigInterface {
   tokenSymbol: string;
   hiddenMetadataUri: string;
   maxSupply: number;
+  //
+  hasFreeMint: boolean|false;
+  maxFreeMintSupply: number | 0;
+  maxFreeMintAmountPerTx: | 0;
+  //
   whitelistSale: SaleConfig;
   preSale: SaleConfig;
   publicSale: SaleConfig;

@@ -1,5 +1,5 @@
 {
-    "name": "@hashlips-lab/nft-erc721-collection-minting-dapp",
+    "name": "@sal-420/nft-erc721-collection-minting-dapp",
     "version": "0.0.0",
     "private": true,
     "devDependencies": {

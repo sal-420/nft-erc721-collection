@@ -29,7 +29,12 @@ interface State {
   isUserInWhitelist: boolean;
   merkleProofManualAddress: string;
   merkleProofManualAddressFeedbackMessage: string|JSX.Element|null;
-  errorMessage: string|JSX.Element|null;
+  errorMessage: string | JSX.Element | null;
+  //
+  hasFreeMint: boolean;
+  maxFreeMintSupply: number;
+  maxFreeMintAmountPerTx: number;
+  //
 }
 
 const defaultState: State = {
@@ -47,6 +52,11 @@ const defaultState: State = {
   merkleProofManualAddress: '',
   merkleProofManualAddressFeedbackMessage: null,
   errorMessage: null,
+  // FreeMint
+  hasFreeMint: false,
+  maxFreeMintSupply: 0,
+  maxFreeMintAmountPerTx: 0,
+  //
 };
 
 export default class Dapp extends React.Component<Props, State> {
@@ -68,9 +78,9 @@ export default class Dapp extends React.Component<Props, State> {
     if (browserProvider?.isMetaMask !== true) {
       this.setError(
         <>
-          We were not able to detect <strong>MetaMask</strong>. We value <strong>privacy and security</strong> a lot so we limit the wallet options on the DAPP.<br />
+          We were not able to detect <strong>MetaMask</strong>. We value <strong>privacy and security</strong> therefore we limit the wallet options on the DAPP.<br />
           <br />
-          But don't worry! <span className="emoji">😃</span> You can always interact with the smart-contract through <a href={this.generateContractUrl()} target="_blank">{this.state.networkConfig.blockExplorer.name}</a> and <strong>we do our best to provide you with the best user experience possible</strong>, even from there.<br />
+          But don't worry! You can always interact with the smart-contract through <a href={this.generateContractUrl()} target="_blank">{this.state.networkConfig.blockExplorer.name}</a> <strong>We do our best to provide you with the best user experience possible</strong>, even from there.<br />
           <br />
           You can also get your <strong>Whitelist Proof</strong> manually, using the tool below.
         </>,
@@ -78,7 +88,6 @@ export default class Dapp extends React.Component<Props, State> {
     }
 
     this.provider = new ethers.providers.Web3Provider(browserProvider);
-
     this.registerWalletEvents(browserProvider);
 
     await this.initWallet();
@@ -87,7 +96,7 @@ export default class Dapp extends React.Component<Props, State> {
   async mintTokens(amount: number): Promise<void>
   {
     try {
-      this.setState({loading: true});
+      this.setState({ loading: true });
       const transaction = await this.contract.mint(amount, {value: this.state.tokenPrice.mul(amount)});
 
       toast.info(<>
@@ -116,6 +125,32 @@ export default class Dapp extends React.Component<Props, State> {
       this.setState({loading: true});
       const transaction = await this.contract.whitelistMint(amount, Whitelist.getProofForAddress(this.state.userAddress!), {value: this.state.tokenPrice.mul(amount)});
 
+      toast.info(<>
+        Transaction sent! Please wait...<br/>
+        <a href={this.generateTransactionUrl(transaction.hash)} target="_blank" rel="noopener">View on {this.state.networkConfig.blockExplorer.name}</a>
+      </>);
+
+      const receipt = await transaction.wait();
+
+      toast.success(<>
+        Success!<br />
+        <a href={this.generateTransactionUrl(receipt.transactionHash)} target="_blank" rel="noopener">View on {this.state.networkConfig.blockExplorer.name}</a>
+      </>);
+
+      this.refreshContractState();
+      this.setState({loading: false});
+    } catch (e) {
+      this.setError(e);
+      this.setState({loading: false});
+    }
+  }
+
+async freeMintTokens(amount: number): Promise<void>
+  {
+    try {
+      this.setState({ loading: true });
+      // tokenPrice has been set to 0 
+      const transaction = await this.contract.freeMint(amount, {value: this.state.tokenPrice.mul(amount)});
       toast.info(<>
         Transaction sent! Please wait...<br/>
         <a href={this.generateTransactionUrl(transaction.hash)} target="_blank" rel="noopener">View on {this.state.networkConfig.blockExplorer.name}</a>
@@ -203,13 +238,21 @@ export default class Dapp extends React.Component<Props, State> {
                   isWhitelistMintEnabled={this.state.isWhitelistMintEnabled}
                   isUserInWhitelist={this.state.isUserInWhitelist}
                   isSoldOut={this.isSoldOut()}
+                  // FreeMint
+                  hasFreeMint={this.state.hasFreeMint}
+                  maxFreeMintSupply={this.state.maxFreeMintSupply}
+                  maxFreeMintAmountPerTx={this.state.maxFreeMintAmountPerTx}
+                  // 
                 />
                 {!this.isSoldOut() ?
                   <MintWidget
                     networkConfig={this.state.networkConfig}
                     maxSupply={this.state.maxSupply}
                     totalSupply={this.state.totalSupply}
-                    tokenPrice={this.state.tokenPrice}
+                    // FreeMint
+                    //tokenPrice={this.state.tokenPrice}
+                    tokenPrice={this.generateFreeOrDefaultMintPriceFromReactState()}
+                    //
                     maxMintAmountPerTx={this.state.maxMintAmountPerTx}
                     isPaused={this.state.isPaused}
                     isWhitelistMintEnabled={this.state.isWhitelistMintEnabled}
@@ -217,6 +260,12 @@ export default class Dapp extends React.Component<Props, State> {
                     mintTokens={(mintAmount) => this.mintTokens(mintAmount)}
                     whitelistMintTokens={(mintAmount) => this.whitelistMintTokens(mintAmount)}
                     loading={this.state.loading}
+                    // FreeMint
+                    hasFreeMint={this.state.hasFreeMint}
+                    maxFreeMintSupply={this.state.maxFreeMintSupply}
+                    maxFreeMintAmountPerTx={this.state.maxFreeMintAmountPerTx}
+                    freeMintTokens={(mintAmount) => this.freeMintTokens(mintAmount)}
+                  //
                   />
                   :
                   <div className="collection-sold-out">
@@ -233,7 +282,7 @@ export default class Dapp extends React.Component<Props, State> {
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
 
-                Loading collection data...
+                Test Contract address '{this.contract}' Loading collection data...
               </div>
             }
           </>
@@ -242,10 +291,11 @@ export default class Dapp extends React.Component<Props, State> {
             {!this.isWalletConnected() ? <button className="primary" disabled={this.provider === undefined} onClick={() => this.connectWallet()}>Connect Wallet</button> : null}
 
             <div className="use-block-explorer">
-              Hey, looking for a <strong>super-safe experience</strong>? <span className="emoji">😃</span><br />
-              You can interact with the smart-contract <strong>directly</strong> through <a href={this.generateContractUrl()} target="_blank">{this.state.networkConfig.blockExplorer.name}</a>, without even connecting your wallet to this DAPP! <span className="emoji">🚀</span><br />
+              Hey, looking for a <strong>super-safe experience</strong>?
               <br />
-              Keep safe! <span className="emoji">❤️</span>
+              You can interact with the smart-contract <strong>directly</strong> through <a href={this.generateContractUrl()} target="_blank">{this.state.networkConfig.blockExplorer.name}</a>, without connecting your wallet to this DAPP!<br />
+              <br />
+              Keep safe!
             </div>
 
             {!this.isWalletConnected() || this.state.isWhitelistMintEnabled ?
@@ -312,7 +362,7 @@ export default class Dapp extends React.Component<Props, State> {
   {
     try {
       await this.provider.provider.request!({ method: 'eth_requestAccounts' });
-
+    console.log("connected");
       this.initWallet();
     } catch (e) {
       this.setError(e);
@@ -327,9 +377,16 @@ export default class Dapp extends React.Component<Props, State> {
       maxMintAmountPerTx: (await this.contract.maxMintAmountPerTx()).toNumber(),
       tokenPrice: await this.contract.cost(),
       isPaused: await this.contract.paused(),
-      isWhitelistMintEnabled: await this.contract.whitelistMintEnabled(),
+      // isWhitelistMintEnabled: await this.contract.whitelistMintEnabled(),
       isUserInWhitelist: Whitelist.contains(this.state.userAddress ?? ''),
+      // FreeMint
+      hasFreeMint: await this.contract.hasFreeMint(),
+      maxFreeMintAmountPerTx: (await this.contract.maxFreeMintAmountPerTx()).toNumber(),
+      maxFreeMintSupply: (await this.contract.maxFreeMintSupply()).toNumber(), 
     });
+    
+    await this.overRideCostWhenHasFreeMintSupply();
+
   }
 
   private async initWallet(): Promise<void>
@@ -388,4 +445,33 @@ export default class Dapp extends React.Component<Props, State> {
       window.location.reload();
     });
   }
+
+  // FreeMint
+  // Derive price from react state 
+  private generateFreeOrDefaultMintPriceFromReactState(): BigNumber
+   {
+    if (this.state.hasFreeMint && this.state.totalSupply < this.state.maxFreeMintSupply) {
+        
+         return BigNumber.from(0);
+    }
+     return this.state.tokenPrice;
+  }
+
+  // Derive price from contract
+   private async generateFreeOrDefaultMintPriceFromContractState(): Promise<ethers.BigNumber>
+   {
+     if (await this.contract.hasFreeMint && await this.contract.totalSupply < await this.contract.maxFreeMintSupply) {
+         return BigNumber.from(0);
+     }
+     return await this.contract.cost();
+  }
+
+  private async overRideCostWhenHasFreeMintSupply(): Promise<void>
+  {
+    this.setState({
+      //tokenPrice: this.generateFreeOrDefaultMintPriceFromReactState(),
+      tokenPrice: await this.generateFreeOrDefaultMintPriceFromContractState(),
+    });
+  }
+
 }

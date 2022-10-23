@@ -1,47 +1,43 @@
-# NFT ERC721 Collection
+# NFT ERC721 Collection with partial free mint option
 
-An all-in-one solution for `ERC721` collections. Build, test and deploy your smart contract, together with a totally
-integrated DAPP within a simple yet powerful workspace.
+A fork of the [hashlips ERC721 collection](https://github.com/hashlips-lab/nft-erc721-collection) repo modified public sale option to include a hybrid of free and paid mints.
 
 ## Disclaimer
+
 This project was created for educational purposes, please refer to the [LICENCE](LICENSE) file for further information.
 
 ## Main features
-- extremely high gas efficiency (users are going to pay lower gas fees compared to traditional collections)
-- whitelist support with customizable list size (using a Merkle Tree for verification)
-- automated contract verification through block explorers (e.g. Etherscan)
-- simple CLI commands that guide you through all the sale steps (whitelist, pre-sale, public sale)
-- built as a Hardhat project with TypeScript support for a better development experience
-- includes a fully-featured minting DAPP (React + TypeScript + SCSS + Webpack)
-- full support for contract interaction through block explorers (e.g. Etherscan), for all the users that do not trust custom DAPPs (including the `whitelistMint(...)` function)
-- customizable minting DAPP (from basic branding to complete customization)
 
-## YouTube tutorials
-
-|Lesson ID|Description|Video link|
-|---|---|---|
-|`01a`|Basic setup on **Windows 10**|https://youtu.be/zjlg-0622PU|
-|`01b`|Basic setup on **macOS Catalina (Intel-based)**|https://youtu.be/acqXzKN5Xys|
-|`01c`|Basic setup on **Linux**|https://youtu.be/imuqi6Vg3Zw|
-|`02`|Speedrun: create and deploy a smart contract + DAPP (v1.x)|https://youtu.be/VpXJZSqLO8A|
-|`03`|The smart contract project|https://youtu.be/XToWWExBLXE|
-|`04`|The minting DAPP project|https://youtu.be/gs9mVwkn8u4|
-|`05`|Configuration and security|https://youtu.be/pkA86GHU_xw|
-|`06`|Managing the collection without leaving Visual Studio Code|https://youtu.be/yOVKEeRMJSs|
-|`07`|Managing the contract using Truffle Dashboard|https://youtu.be/fwdIA5UuPmM|
-|`08`|Running smart contract functions manually on the block explorer|https://youtu.be/zhvTJhBbtnE|
-|`09`|Customizing the look and feel of the DAPP|https://youtu.be/GoDp6yZAY9A|
-|`10`|Deploying the DAPP|https://youtu.be/uUrbIXUgVz4|
-
-_More videos coming soon..._
+A public sale with free and paid mints. When the free mint supply is exhausted the contract switches to paid mints.
 
 ## Requirements
 
 ### Software
-- [Visual Studio Code](https://code.visualstudio.com/) (with the [Solidity](https://marketplace.visualstudio.com/items?itemName=JuanBlanco.solidity) extension)
-- [NodeJs](https://nodejs.org/) (with the [Yarn package manager](https://yarnpkg.com/getting-started/install))
+
+Please refer to the [hashlips ERC721 collection](https://github.com/hashlips-lab/nft-erc721-collection) for excellent video's.
 
 ### Services
-- Etherscan free API key _(optional: used for the automated contract verificiation, as well as retrieving the current values for gas cost estimation)_
-- Infura free basic plan or higher _(optional: used by the CLI commands in order to perform operations on real blockchains, you can skip this if you deploy and manage your contract manually)_
-- Coin Market Cap free API key _(optional: used for retrieving the current token price for gas cost estimation in USD)_
+
+Please refer to the [hashlips ERC721 collection](https://github.com/hashlips-lab/nft-erc721-collection) for excellent video's.
+
+### Partial Free Mint Setup
+
+This project follows the hashlips ERC721 collection set-up and deployment process for a seamless free mint to paid mint set-up.
+
+Before deploying the contract update `CollectionFonfig.ts` 
+
+|Step|Description|Field to update|
+|---|---|---|
+|`01`|Set the free mint supply|`maxFreeMintSupply: 10`|
+|`02`|Set the mint cost to be used after free mints are exhausted| `publicSale: { ` **`price: 0.0042069,`**|
+
+#### Deploy the contract with partial free mints set-up, **in this order:**
+
+|Step|Description|
+|---|---|
+|`01`|Open the public sale, run script: `public-sale-open`|
+|`02`|Head over to your contract on etherscan|
+|`03`|Set the number of max free mints per transaction using function: `setMaxFreeMintAmountPerTxn`|
+|`04`|Active the free mint option using function: `setHasFreeMint` to set `_state` to `true`|
+
+The contract is now setup for partial free mints. When the free mint supply is exhaused the contract will switch to the paid amount

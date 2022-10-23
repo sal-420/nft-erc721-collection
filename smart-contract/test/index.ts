@@ -72,9 +72,98 @@ describe(CollectionConfig.contractName, function () {
     expect(await contract.whitelistMintEnabled()).to.equal(false);
     expect(await contract.revealed()).to.equal(false);
 
+    //
+    expect(await contract.hasFreeMint()).to.equal(CollectionConfig.hasFreeMint);
+    expect(await contract.maxFreeMintSupply()).to.equal(CollectionConfig.maxFreeMintSupply);
+    expect(await contract.maxFreeMintAmountPerTx()).to.equal(CollectionConfig.maxFreeMintAmountPerTx);
+    expect(await contract.hasFreeMint()).to.equal(false);
+    //
+
     await expect(contract.tokenURI(1)).to.be.revertedWith('ERC721Metadata: URI query for nonexistent token');
   });
 
+//----------------------------------------
+  
+  // it('Free Mint', async function () {
+  //   console.log("------------hello from free mint 0  ----------------------------- ");
+  //   let startMaxSupply = await contract.maxSupply();
+  //   let startTotalSupply = await contract.totalSupply();
+  //   console.log("_start max supply --> ", startMaxSupply);
+  //   console.log("_start total supply --> ", startTotalSupply);
+
+  //   const maxFreeMintSupply = 5;
+  //   const maxFreeMintAmountPerTx = 3;
+  //   // Nobody should be able to mint from a paused contract
+  //   await expect(contract.connect(holder).freeMint(1)).to.be.revertedWith('The contract is paused!');
+
+  //   await contract.setPaused(false);
+  //   await expect(contract.connect(holder).freeMint(1)).to.be.revertedWith('Free mint is not available!');
+  //   await contract.setHasFreeMint(true);
+  //   await contract.setMaxFreeMintSupply(maxFreeMintSupply);
+  //   await contract.setMaxFreeMintAmountPerTx(maxFreeMintAmountPerTx);
+  //   await expect(contract.connect(holder).freeMint(0)).to.be.revertedWith('Free mint amount must be 1 or more!');
+  //   await expect(contract.connect(holder).freeMint(maxFreeMintAmountPerTx + 1)).to.be.revertedWith('Free mint amount execeeds max free mint per transaction!');
+  
+  //   console.log("xxxxxxxxxxxxxxxxxxmsg.sender balanceOfNFtTokenAmountInWallet(bef)-> ", await contract.balanceOfNFtTokenAmountInWallet(await holder.getAddress()));
+  //   console.log("xxxxxxxxxxxxxxxxxxallowedFreeMintAmountPerTxn(bef)-> ", await contract. allowedFreeMintAmountPerTxn());
+  //    await contract.connect(holder).freeMint(3);
+  //    expect(await contract.balanceOf(await holder.getAddress())).to.equal(3);
+  //   console.log("xxxxxxxxxxxxxxxxxxmsg.sender balanceOfNFtTokenAmountInWallet-> ", await contract.balanceOfNFtTokenAmountInWallet(await holder.getAddress()));
+    
+  //    await contract.setMaxFreeMintAmountPerTx(maxFreeMintAmountPerTx + 2); // =5
+
+
+  //    //await expect(contract.connect(holder).freeMint(4)).to.be.revertedWith('The requested free mint amount will exceed your eligible free mint amount. Your eligible free mint amount is the same as as the free mint per tranasction amount');
+  //   await expect(contract.connect(holder).freeMint(2));
+  //    await expect(contract.connect(holder).freeMint(3)).to.be.revertedWith('Free mint amount will exceed max free mint supply');
+
+  
+    
+  //   const endMaxSupply = await contract.maxSupply();
+  //   const endTotalSupply = await contract.totalSupply();
+  //   startMaxSupply = await contract.maxSupply();
+  //   startTotalSupply = await contract.totalSupply();
+  //   console.log("----------------------------------------- ");
+  //   console.log("start max supply --> ", startMaxSupply);
+  //   console.log("end max supply --> ", endMaxSupply);
+  //   console.log("start total supply --> ", startTotalSupply);
+  //   console.log("end total supply --> ", endTotalSupply);
+  //   console.log("Max FreeMin amount per txn", await contract.allowedFreeMintAmountPerTxn());
+  //   console.log("msg.sender balanceOfNFtTokenAmountInWallet-> ", await contract.balanceOfNFtTokenAmountInWallet(await holder.getAddress()));
+  //    console.log("contract.balanceOf(owner.address-> ", contract.balanceOf(owner.address)); 
+  //   console.log("----------------------------------------- ");
+
+  //   console.log("Holder EthBal", await holder.getBalance());
+  //   console.log("Holder txnCnt", await holder.getTransactionCount());
+  //   console.log("contract TotSupply", await contract.totalSupply());
+
+  //   //console.log("holder-> ", holder);
+  //     // await expect(contract.connect(holder).freeMint(1)).to.be.revertedWith('You have reached your eligible free mint amount. Your eligible free mint amount is the same as as the free mint per tranasction amount');
+  //    //await expect(contract.connect(holder).freeMint(2)).to.be.revertedWith('The requested free mint amount will exceed your eligible free mint amount. Your eligible free mint amount is the same as as the free mint per tranasction amount');
+
+  //   // Check balances
+  //   const balanceOfContractAddress = await contract.balanceOf(await owner.getAddress());
+  //   const balanceOfOwnerAddress = await contract.balanceOf(await owner.getAddress());
+  //   const balanceOfHolderAddress = await contract.balanceOf(await holder.getAddress());
+  //   const balanceOfExternalUserAddress = await contract.balanceOf(await externalUser.getAddress());
+  //    console.log("balanceOfContractAddress-> ", balanceOfContractAddress);
+  //   console.log("balanceOfOwnerAddress-> ", balanceOfOwnerAddress);
+  //   console.log("balanceOfHolderAddress-> ", balanceOfHolderAddress);
+  //    console.log("balanceOfExternalUserAddress-> ", balanceOfExternalUserAddress);
+    
+  //   //expect(await contract.balanceOf(await owner.getAddress())).to.equal(1);
+  //  // expect(await contract.balanceOf(await whitelistedUser.getAddress())).to.equal(1);
+    
+  //   //expect(await contract.balanceOf(await holder.getAddress())).to.equal(0);
+  //   //expect(await contract.balanceOf(await externalUser.getAddress())).to.equal(0);
+  // });
+  
+
+
+//------------------------------
+  
+  
+  
   it('Before any sale', async function () {
     // Nobody should be able to mint from a paused contract
     await expect(contract.connect(whitelistedUser).mint(1, {value: getPrice(SaleType.WHITELIST, 1)})).to.be.revertedWith('The contract is paused!');
@@ -84,6 +173,9 @@ describe(CollectionConfig.contractName, function () {
     await expect(contract.connect(owner).mint(1, {value: getPrice(SaleType.WHITELIST, 1)})).to.be.revertedWith('The contract is paused!');
     await expect(contract.connect(owner).whitelistMint(1, [], {value: getPrice(SaleType.WHITELIST, 1)})).to.be.revertedWith('The whitelist sale is not enabled!');
 
+    // FreeMint
+    await expect(contract.connect(owner).freeMint(1)).to.be.revertedWith('The contract is paused!');
+     
     // The owner should always be able to run mintForAddress
     await (await contract.mintForAddress(1, await owner.getAddress())).wait();
     await (await contract.mintForAddress(1, await whitelistedUser.getAddress())).wait();
@@ -91,13 +183,14 @@ describe(CollectionConfig.contractName, function () {
     await expect(contract.mintForAddress(
       await (await contract.maxMintAmountPerTx()).add(1),
       await holder.getAddress(),
-    )).to.be.revertedWith('Invalid mint amount!');
+    )).to.be.revertedWith('Invalid mint amount. Mint amount can not be greater than mint amount max per transaction!');
 
     // Check balances
     expect(await contract.balanceOf(await owner.getAddress())).to.equal(1);
     expect(await contract.balanceOf(await whitelistedUser.getAddress())).to.equal(1);
     expect(await contract.balanceOf(await holder.getAddress())).to.equal(0);
     expect(await contract.balanceOf(await externalUser.getAddress())).to.equal(0);
+    console.log("total supply 'before any sale' check balances --> ",   await contract.totalSupply());
   });
 
   it('Whitelist sale', async function () {
@@ -126,7 +219,7 @@ describe(CollectionConfig.contractName, function () {
       await (await contract.maxMintAmountPerTx()).add(1),
       merkleTree.getHexProof(keccak256(await whitelistedUser.getAddress())),
       {value: getPrice(SaleType.WHITELIST, await (await contract.maxMintAmountPerTx()).add(1).toNumber())},
-    )).to.be.revertedWith('Invalid mint amount!');
+    )).to.be.revertedWith('Invalid mint amount. Mint amount can not be greater than mint amount max per transaction!');
     // Sending insufficient funds
     await expect(contract.connect(whitelistedUser).whitelistMint(
       1,
@@ -161,6 +254,7 @@ describe(CollectionConfig.contractName, function () {
     expect(await contract.balanceOf(await whitelistedUser.getAddress())).to.equal(2);
     expect(await contract.balanceOf(await holder.getAddress())).to.equal(0);
     expect(await contract.balanceOf(await externalUser.getAddress())).to.equal(0);
+    console.log("total supply 'whitelist sale' check balances --> ",   await contract.totalSupply());
   });
     
   it('Pre-sale (same as public sale)', async function () {
@@ -174,7 +268,7 @@ describe(CollectionConfig.contractName, function () {
     await expect(contract.connect(whitelistedUser).mint(
       await (await contract.maxMintAmountPerTx()).add(1),
       {value: getPrice(SaleType.PRE_SALE, await (await contract.maxMintAmountPerTx()).add(1).toNumber())},
-    )).to.be.revertedWith('Invalid mint amount!');
+    )).to.be.revertedWith('Invalid mint amount. Mint amount can not be greater than mint amount max per transaction!');
     // Sending a whitelist mint transaction
     await expect(contract.connect(whitelistedUser).whitelistMint(
       1,
@@ -185,6 +279,8 @@ describe(CollectionConfig.contractName, function () {
     // Pause pre-sale
     await contract.setPaused(true);
     await contract.setCost(utils.parseEther(CollectionConfig.publicSale.price.toString()));
+
+    console.log("total supply 'pre sale' check balances --> ",   await contract.totalSupply());
   });
     
   it('Owner only functions', async function () {
@@ -199,6 +295,11 @@ describe(CollectionConfig.contractName, function () {
     await expect(contract.connect(externalUser).setMerkleRoot('0x0000000000000000000000000000000000000000000000000000000000000000')).to.be.revertedWith('Ownable: caller is not the owner');
     await expect(contract.connect(externalUser).setWhitelistMintEnabled(false)).to.be.revertedWith('Ownable: caller is not the owner');
     await expect(contract.connect(externalUser).withdraw()).to.be.revertedWith('Ownable: caller is not the owner');
+    // FreeMint
+    await expect(contract.connect(externalUser).setHasFreeMint(false)).to.be.revertedWith('Ownable: caller is not the owner');
+    await expect(contract.connect(externalUser).setMaxFreeMintSupply(99999)).to.be.revertedWith('Ownable: caller is not the owner');
+    await expect(contract.connect(externalUser).setMaxFreeMintAmountPerTx(99999)).to.be.revertedWith('Ownable: caller is not the owner');
+    //
   });
     
   it('Wallet of owner', async function () {
@@ -215,13 +316,17 @@ describe(CollectionConfig.contractName, function () {
       BigNumber.from(5),
     ]);
     expect(await contract.tokensOfOwner(await externalUser.getAddress())).deep.equal([]);
+
+    console.log("total supply 'walet of owner' check --> ",   await contract.totalSupply());
   });
     
   it('Supply checks (long)', async function () {
+    console.log("total supply 'supply checks' check --> ",   await contract.totalSupply());
     if (process.env.EXTENDED_TESTS === undefined) {
+       console.log("process.env.EXTENDED_TESTS === undefined. Skipping Supply checks");
       this.skip();
     }
-
+    console.log("process.env.EXTENDED_TESTS ===", process.env.EXTENDED_TESTS);
     const alreadyMinted = 6;
     const maxMintAmountPerTx = 1000;
     const iterations = Math.floor((CollectionConfig.maxSupply - alreadyMinted) / maxMintAmountPerTx);
@@ -280,4 +385,76 @@ describe(CollectionConfig.contractName, function () {
     expect(await contract.tokenURI(1)).to.equal(`${uriPrefix}1${uriSuffix}`);
     expect(await contract.tokenURI(totalSupply)).to.equal(`${uriPrefix}${totalSupply}${uriSuffix}`);
   });
+
+  it('Free Mint should be firstxxxxx', async function () {
+    let startMaxSupply = await contract.maxSupply();
+    let startTotalSupply = await contract.totalSupply();
+    console.log("_start max supply --> ", startMaxSupply);
+    console.log("_start total supply --> ", startTotalSupply);
+
+    const maxFreeMintSupply = 14;
+    const maxFreeMintAmountPerTx = 5;
+    // Nobody should be able to mint from a paused contract
+    await expect(contract.connect(holder).freeMint(1)).to.be.revertedWith('The contract is paused!');
+
+    await contract.setPaused(false);
+    await expect(contract.connect(holder).freeMint(1)).to.be.revertedWith('Free mint is not available!');
+    await contract.setHasFreeMint(true);
+    await contract.setMaxFreeMintSupply(maxFreeMintSupply);
+    await contract.setMaxFreeMintAmountPerTx(maxFreeMintAmountPerTx);
+    await expect(contract.connect(holder).freeMint(0)).to.be.revertedWith('Free mint amount must be 1 or more!');
+    await expect(contract.connect(holder).freeMint(maxFreeMintAmountPerTx + 1)).to.be.revertedWith('Free mint amount execeeds max per free mint transaction!');
+    
+     console.log("------------Attempt to MINT 3  ----------------------------- ");
+     console.log("total supply before 3 mints --> ",   await contract.totalSupply());
+    await contract.connect(holder).freeMint(3);
+     console.log("total supply after 3 mints --> ",   await contract.totalSupply());
+    // console.log("------------Minted 3  ----------------------------- ");
+    // expect(await contract.balanceOf(await holder.getAddress())).to.equal(3);
+    // console.log("------------Confirmed 3 mints  ----------------------------- ");
+
+    await expect(contract.connect(holder).freeMint(2));
+    await expect(contract.connect(holder).freeMint(2));
+    await expect(contract.connect(holder).freeMint(5)).to.be.revertedWith('Free mint amount will exceed max free mint supply');
+    await expect(contract.connect(holder).freeMint(1));
+    
+    const endMaxSupply = await contract.maxSupply();
+    const endTotalSupply = await contract.totalSupply();
+    startMaxSupply = await contract.maxSupply();
+    startTotalSupply = await contract.totalSupply();
+    console.log("----------------------------------------- ");
+    console.log("start max supply --> ", startMaxSupply);
+    console.log("end max supply --> ", endMaxSupply);
+    console.log("start total supply --> ", startTotalSupply);
+    console.log("end total supply --> ", endTotalSupply);
+    console.log("Max FreeMin amount per txn", await contract.allowedFreeMintAmountPerTxn());
+    console.log("msg.sender balanceOfNFtTokenAmountInWallet-> ", await contract.balanceOfNFtTokenAmountInWallet(await holder.getAddress()));
+     console.log("contract.balanceOf(owner.address-> ", contract.balanceOf(owner.address)); 
+    console.log("----------------------------------------- ");
+
+    console.log("Holder EthBal", await holder.getBalance());
+    console.log("Holder txnCnt", await holder.getTransactionCount());
+    console.log("contract TotSupply", await contract.totalSupply());
+
+    //console.log("holder-> ", holder);
+      // await expect(contract.connect(holder).freeMint(1)).to.be.revertedWith('You have reached your eligible free mint amount. Your eligible free mint amount is the same as as the free mint per tranasction amount');
+     //await expect(contract.connect(holder).freeMint(2)).to.be.revertedWith('The requested free mint amount will exceed your eligible free mint amount. Your eligible free mint amount is the same as as the free mint per tranasction amount');
+
+    // Check balances
+    const balanceOfContractAddress = await contract.balanceOf(await owner.getAddress());
+    const balanceOfOwnerAddress = await contract.balanceOf(await owner.getAddress());
+    const balanceOfHolderAddress = await contract.balanceOf(await holder.getAddress());
+    const balanceOfExternalUserAddress = await contract.balanceOf(await externalUser.getAddress());
+     console.log("balanceOfContractAddress-> ", balanceOfContractAddress);
+    console.log("balanceOfOwnerAddress-> ", balanceOfOwnerAddress);
+    console.log("balanceOfHolderAddress-> ", balanceOfHolderAddress);
+     console.log("balanceOfExternalUserAddress-> ", balanceOfExternalUserAddress);
+    
+    //expect(await contract.balanceOf(await owner.getAddress())).to.equal(1);
+   // expect(await contract.balanceOf(await whitelistedUser.getAddress())).to.equal(1);
+    
+    //expect(await contract.balanceOf(await holder.getAddress())).to.equal(0);
+    //expect(await contract.balanceOf(await externalUser.getAddress())).to.equal(0);
+  });
+  
 });
