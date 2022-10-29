@@ -30,6 +30,8 @@ Before deploying the contract update `CollectionFonfig.ts`
 |---|---|---|
 |`01`|Set the free mint supply|`maxFreeMintSupply: 10`|
 |`02`|Set the mint cost to be used after free mints are exhausted| `publicSale: { ` **`price: 0.0042069,`**|
+|`03`|Set the maximum mints per transaction to be used after free mints are exhausted| `publicSale: { ` **`maxMintAmountPerTx: 2,`**|
+
 
 #### Deploy the contract with partial free mints set-up, **in this order:**
 
@@ -40,4 +42,6 @@ Before deploying the contract update `CollectionFonfig.ts`
 |`03`|Set the number of max free mints per transaction using function: `setMaxFreeMintAmountPerTxn`|
 |`04`|Active the free mint option using function: `setHasFreeMint` to set `_state` to `true`|
 
-The contract is now setup for partial free mints. When the free mint supply is exhaused the contract will switch to the paid amount
+The contract is now setup for partial free mints. When the free mint supply is exhausted the contract will switch to the paid mint model
+
+For a detailed start to finish set-up, deploy, and demo checkout the you tube video located [here](https://www.youtube.com/watch?v=NizcL16A1co)
